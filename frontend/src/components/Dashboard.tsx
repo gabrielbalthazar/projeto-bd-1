@@ -1,4 +1,5 @@
-import { Package, TrendingUp, TrendingDown, AlertTriangle } from "lucide-react";
+import { AlertTriangle, Package } from "lucide-react";
+import { useEffect, useState } from "react";
 
 const Dashboard = () => {
   // Dados mockados - você integrará com seu backend
@@ -15,6 +16,27 @@ const Dashboard = () => {
     { nome: "Amoxicilina 500mg", estoque: 5, minimo: 25 }
   ];
 
+  const [inventory, setInventory] = useState([]);
+
+  useEffect(() => {
+    async function fetchMedicamentos() {
+      try {
+        const response = await fetch("http://localhost:5000/api/inventory");
+        const data = await response.json();
+
+        // Agrupar e contar medicamentos por nome (ou outro campo)
+
+        setInventory(data);
+      } catch (error) {
+        console.error("Erro ao buscar medicamentos:", error);
+      }
+    }
+
+    fetchMedicamentos();
+  }, []);
+
+  console.log(inventory)
+
   return (
     <div className="space-y-6">
       <h2 className="text-3xl font-bold text-foreground">Dashboard</h2>
@@ -25,13 +47,13 @@ const Dashboard = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-muted-foreground text-sm">Total de Medicamentos</p>
-              <p className="text-3xl font-bold text-foreground">{stats.totalMedicamentos}</p>
+              <p className="text-3xl font-bold text-foreground">{inventory.reduce((total, item) => total + item.quantidade, 0)}</p>
             </div>
             <Package className="h-8 w-8 text-primary" />
           </div>
         </div>
 
-        <div className="bg-card p-6 rounded-lg border border-border">
+        {/* <div className="bg-card p-6 rounded-lg border border-border">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-muted-foreground text-sm">Entradas (Mês)</p>
@@ -49,13 +71,13 @@ const Dashboard = () => {
             </div>
             <TrendingDown className="h-8 w-8 text-red-600" />
           </div>
-        </div>
+        </div> */}
 
         <div className="bg-card p-6 rounded-lg border border-border">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-muted-foreground text-sm">Estoque Mínimo</p>
-              <p className="text-3xl font-bold text-orange-600">{stats.estoqueMinimo}</p>
+              <p className="text-3xl font-bold text-orange-600">20</p>
             </div>
             <AlertTriangle className="h-8 w-8 text-orange-600" />
           </div>
@@ -74,20 +96,26 @@ const Dashboard = () => {
               <tr className="border-b border-border">
                 <th className="text-left p-2 text-muted-foreground">Medicamento</th>
                 <th className="text-left p-2 text-muted-foreground">Estoque Atual</th>
-                <th className="text-left p-2 text-muted-foreground">Estoque Mínimo</th>
                 <th className="text-left p-2 text-muted-foreground">Status</th>
               </tr>
             </thead>
             <tbody>
-              {medicamentosEstoqueMinimo.map((med, index) => (
+              {inventory.map((med, index) => (
                 <tr key={index} className="border-b border-border">
-                  <td className="p-2 text-foreground">{med.nome}</td>
-                  <td className="p-2 text-foreground">{med.estoque}</td>
-                  <td className="p-2 text-foreground">{med.minimo}</td>
+                  <td className="p-2 text-foreground">{med.nome_medicamento}</td>
+                  <td className="p-2 text-foreground">{med.quantidade}</td>
                   <td className="p-2">
-                    <span className="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800">
+                    {
+                      med.quantidade <= 20 ? (
+                        <span className="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800">
                       Crítico
                     </span>
+                      ) : (
+                        <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">
+                      Normal
+                    </span>
+                      )
+                    }
                   </td>
                 </tr>
               ))}
