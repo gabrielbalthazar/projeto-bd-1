@@ -1,3 +1,5 @@
+import db from '../db.js';
+
 export const findAll = (req, res) => {
   db.all('SELECT * FROM Estoque', (err, rows) => {
     if (err) {
@@ -26,7 +28,9 @@ export const create = (req, res) => {
   const { lote, quantidade, codigo_lote_chave_parcial } = req.body;
 
   if (!lote || !quantidade || !codigo_lote_chave_parcial) {
-    return res.status(400).send({ error: 'Campos obrigatórios: lote, quantidade, codigo_lote_chave_parcial' });
+    return res.status(400).send({
+      error: 'Campos obrigatórios: lote, quantidade, codigo_lote_chave_parcial',
+    });
   }
 
   db.run(
@@ -36,7 +40,9 @@ export const create = (req, res) => {
       if (err) {
         res.status(500).send({ error: err.message });
       } else {
-        res.status(201).send({ message: 'Estoque criado com sucesso', id: this.lastID });
+        res
+          .status(201)
+          .send({ message: 'Estoque criado com sucesso', id: this.lastID });
       }
     }
   );

@@ -1,3 +1,5 @@
+import db from '../db.js';
+
 export const findAll = (req, res) => {
   db.all('SELECT * FROM Medico', (err, rows) => {
     if (err) {
@@ -26,7 +28,9 @@ export const create = (req, res) => {
   const { nome, crm, especialidade } = req.body;
 
   if (!nome || !crm || !especialidade) {
-    return res.status(400).send({ error: 'Campos obrigatórios: nome, crm, especialidade' });
+    return res
+      .status(400)
+      .send({ error: 'Campos obrigatórios: nome, crm, especialidade' });
   }
 
   db.run(
@@ -36,7 +40,9 @@ export const create = (req, res) => {
       if (err) {
         res.status(500).send({ error: err.message });
       } else {
-        res.status(201).send({ message: 'Médico criado com sucesso', id: this.lastID });
+        res
+          .status(201)
+          .send({ message: 'Médico criado com sucesso', id: this.lastID });
       }
     }
   );

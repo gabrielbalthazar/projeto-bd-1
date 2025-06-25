@@ -1,3 +1,5 @@
+import db from '../db.js';
+
 export const findAll = (req, res) => {
   db.all('SELECT * FROM Gera', (err, rows) => {
     if (err) {
@@ -40,4 +42,3 @@ export const update = (req, res) => {
     }
   );
 };
-
