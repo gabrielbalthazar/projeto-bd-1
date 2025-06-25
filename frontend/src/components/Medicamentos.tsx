@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Plus, Search, Edit, Trash2, Package } from 'lucide-react';
+import { Edit, Package, Plus, Search, Trash2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { ModalBase } from '../components/ModalBase'; // Ajuste o caminho se necessário
 
 const Medicamentos = () => {
@@ -10,9 +10,17 @@ const Medicamentos = () => {
   const [medicamentoSelecionado, setMedicamentoSelecionado] =
     useState<any>(null);
 
+  const [inventory, setInventory] = useState([]);
+
+  // Dados mockados - você integrará com seu backend
   const medicamentos = [
     {
       id: 1,
+      nome: 'Paracetamol 500mg',
+      categoria: 'Analgésico',
+      fabricante: 'EMS',
+      lote: 'ABC123',
+      validade: '2024-12-31',
       nome: 'Paracetamol 500mg',
       categoria: 'Analgésico',
       fabricante: 'EMS',
@@ -46,8 +54,27 @@ const Medicamentos = () => {
     },
   ];
 
+  useEffect(() => {
+    async function fetchMedicamentos() {
+      try {
+        const response = await fetch('http://localhost:5000/api/inventory');
+        const data = await response.json();
+
+        // Agrupar e contar medicamentos por nome (ou outro campo)
+
+        setInventory(data);
+      } catch (error) {
+        console.error('Erro ao buscar medicamentos:', error);
+      }
+    }
+
+    fetchMedicamentos();
+  }, []);
+
+  console.log(inventory);
+
   const filteredMedicamentos = medicamentos.filter(
-    (med) =>
+    med =>
       med.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
       med.categoria.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -75,7 +102,7 @@ const Medicamentos = () => {
           type='text'
           placeholder='Pesquisar medicamentos...'
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          onChange={e => setSearchTerm(e.target.value)}
           className='w-full pl-10 pr-4 py-2 bg-card border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent'
         />
       </div>
@@ -86,64 +113,44 @@ const Medicamentos = () => {
           <table className='w-full'>
             <thead className='bg-muted'>
               <tr>
-                <th className='text-left p-4 text-muted-foreground'>
-                  Medicamento
-                </th>
-                <th className='text-left p-4 text-muted-foreground'>
-                  Categoria
-                </th>
-                <th className='text-left p-4 text-muted-foreground'>
-                  Fabricante
-                </th>
+                <th className='text-left p-4 text-muted-foreground'>Medicamento</th>
                 <th className='text-left p-4 text-muted-foreground'>Lote</th>
-                <th className='text-left p-4 text-muted-foreground'>
-                  Validade
-                </th>
-                <th className='text-left p-4 text-muted-foreground'>Estoque</th>
-                <th className='text-left p-4 text-muted-foreground'>Preço</th>
+                <th className='text-left p-4 text-muted-foreground'>Validade</th>
+                <th className='text-left p-4 text-muted-foreground'>Quantidade</th>
                 <th className='text-left p-4 text-muted-foreground'>Ações</th>
               </tr>
             </thead>
             <tbody>
-              {filteredMedicamentos.map((med) => (
-                <tr
-                  key={med.id}
-                  className='border-b border-border hover:bg-muted/50'
-                >
-                  <td className='p-4'>
-                    <div className='flex items-center gap-3'>
-                      <Package className='h-5 w-5 text-primary' />
-                      <span className='font-medium text-foreground'>
-                        {med.nome}
-                      </span>
-                    </div>
-                  </td>
-                  <td className='p-4 text-foreground'>{med.categoria}</td>
-                  <td className='p-4 text-foreground'>{med.fabricante}</td>
-                  <td className='p-4 text-foreground'>{med.lote}</td>
-                  <td className='p-4 text-foreground'>{med.validade}</td>
-                  <td className='p-4'>
-                    <div className='flex flex-col'>
-                      <span
-                        className={`font-medium ${
-                          med.estoque <= med.estoqueMinimo
-                            ? 'text-red-600'
-                            : 'text-foreground'
-                        }`}
-                      >
-                        {med.estoque}
-                      </span>
-                      <span className='text-xs text-muted-foreground'>
-                        Mín: {med.estoqueMinimo}
-                      </span>
-                    </div>
-                  </td>
-                  <td className='p-4 text-foreground'>
-                    R$ {med.preco.toFixed(2)}
-                  </td>
-                  <td className='p-4'>
-                    <div className='flex gap-2'>
-                      <button
+              {inventory
+                .filter(
+                  med =>
+                    med.nome_medicamento &&
+                    med.nome_medicamento.toLowerCase().includes(searchTerm.toLowerCase())
+                )
+                .map(med => (
+                  <tr key={med.id} className='border-b border-border hover:bg-muted/50'>
+                    <td className='p-4'>
+                      <div className='flex items-center gap-3'>
+                        <Package className='h-5 w-5 text-primary' />
+                        <span className='font-medium text-foreground'>{med.nome_medicamento}</span>
+                      </div>
+                    </td>
+                    <td className='p-4 text-foreground'>{med.lote}</td>
+                    <td className='p-4 text-foreground'>{med.data_validade}</td>
+                    <td className='p-4'>
+                      <div className='flex flex-col'>
+                        <span
+                          className={`font-medium ${
+                            med.estoque <= 20 ? 'text-red-600' : 'text-foreground'
+                          }`}
+                        >
+                          {med.quantidade}
+                        </span>
+                      </div>
+                    </td>
+                    <td className='p-4'>
+                      <div className='flex gap-2'>
+                        <button
                         className='p-2 text-primary hover:bg-primary/10 rounded'
                         onClick={() => {
                           setMedicamentoSelecionado(med);
@@ -161,10 +168,10 @@ const Medicamentos = () => {
                       >
                         <Trash2 className='h-4 w-4' />
                       </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
             </tbody>
           </table>
         </div>

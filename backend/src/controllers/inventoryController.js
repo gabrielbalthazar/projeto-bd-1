@@ -1,7 +1,19 @@
 import db from '../db.js';
 
 export const findAll = (req, res) => {
-  db.all('SELECT * FROM Estoque', (err, rows) => {
+  const query = `
+    SELECT 
+      Estoque.lote,
+      Estoque.id_medicamento,
+      Medicamento.nome AS nome_medicamento,
+      Medicamento.data_validade AS data_validade,
+      Estoque.quantidade,
+      Estoque.codigo_lote_chave_parcial
+    FROM Estoque
+    JOIN Medicamento ON Estoque.id_medicamento = Medicamento.id
+  `;
+
+  db.all(query, (err, rows) => {
     if (err) {
       res.status(500).send({ error: err.message });
     } else {
@@ -25,7 +37,7 @@ export const findOne = (req, res) => {
 };
 
 export const create = (req, res) => {
-  const { lote, quantidade, codigo_lote_chave_parcial } = req.body;
+  const { lote, id_medicamento, quantidade, codigo_lote_chave_parcial } = req.body;
 
   if (!lote || !quantidade || !codigo_lote_chave_parcial) {
     return res.status(400).send({
@@ -34,8 +46,8 @@ export const create = (req, res) => {
   }
 
   db.run(
-    'INSERT INTO Estoque (lote, quantidade, codigo_lote_chave_parcial) VALUES (?, ?, ?)',
-    [lote, quantidade, codigo_lote_chave_parcial],
+    'INSERT INTO Estoque (lote, id_medicamento, quantidade, codigo_lote_chave_parcial) VALUES (?, ?, ?, ?)',
+    [lote, id_medicamento, quantidade, codigo_lote_chave_parcial],
     function (err) {
       if (err) {
         res.status(500).send({ error: err.message });

@@ -1,7 +1,19 @@
 import db from '../db.js';
 
 export const findAll = (req, res) => {
-  db.all('SELECT * FROM Atende', (err, rows) => {
+  const query = `
+    SELECT 
+      Atende.id_medico,
+      Medico.nome AS nome_medico,
+      Atende.id_paciente,
+      Paciente.nome AS nome_paciente,
+      Medico.especialidade AS medico_especialidade
+    FROM Atende
+    JOIN Medico ON Atende.id_medico = Medico.id
+    JOIN Paciente ON Atende.id_paciente = Paciente.id
+  `;
+
+  db.all(query, (err, rows) => {
     if (err) {
       res.status(500).send({ error: err.message });
     } else {
