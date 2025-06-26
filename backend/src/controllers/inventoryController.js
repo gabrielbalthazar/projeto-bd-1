@@ -7,6 +7,8 @@ export const findAll = (req, res) => {
       Estoque.id_medicamento,
       Medicamento.nome AS nome_medicamento,
       Medicamento.data_validade AS data_validade,
+      Medicamento.principio_ativo AS principio_ativo,
+      Medicamento.dosagem AS dosagem,
       Estoque.quantidade,
       Estoque.codigo_lote_chave_parcial
     FROM Estoque

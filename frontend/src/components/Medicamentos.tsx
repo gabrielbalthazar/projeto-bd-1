@@ -9,7 +9,6 @@ const Medicamentos = () => {
   const [modalEdicaoAberto, setModalEdicaoAberto] = useState(false);
   const [modalExclusaoAberto, setModalExclusaoAberto] = useState(false);
   const [medicamentoSelecionado, setMedicamentoSelecionado] = useState<any>(null);
-
   const [inventory, setInventory] = useState([]);
 
   async function fetchMedicamentos() {
@@ -69,12 +68,6 @@ const Medicamentos = () => {
   }, []);
 
   console.log(inventory);
-
-  // const filteredMedicamentos = inventory.filter(
-  //   med =>
-  //     med.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-  //     med.categoria.toLowerCase().includes(searchTerm.toLowerCase())
-  // );
 
   return (
     <div className='space-y-6'>
@@ -222,7 +215,7 @@ const Medicamentos = () => {
           <input
             name='chave_parcial'
             className='w-full border p-2 mb-2 rounded'
-            placeholder='Chave parcial'
+            placeholder='Código'
           />
           <button type='submit' className='bg-primary text-white px-4 py-2 rounded'>
             Salvar

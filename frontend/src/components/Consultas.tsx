@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Plus, Search, User } from 'lucide-react';
+import { FileText, Plus, Search, User } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { ModalBase } from '../components/ModalBase';
 
@@ -20,7 +20,7 @@ const Consultas = () => {
       const data = await response.json();
       setDoctors(data);
     } catch (error) {
-      console.error('Erro ao buscar medicamentos:', error);
+      console.error('Erro ao buscar medicos:', error);
     }
   }
 
@@ -38,12 +38,9 @@ const Consultas = () => {
     try {
       const response = await fetch('http://localhost:5000/api/meeting');
       const data = await response.json();
-
-      // Agrupar e contar medicamentos por nome (ou outro campo)
-
       setConsultas(data);
     } catch (error) {
-      console.error('Erro ao buscar medicamentos:', error);
+      console.error('Erro ao buscar consultas:', error);
     }
   }
 
@@ -51,9 +48,6 @@ const Consultas = () => {
     try {
       const response = await fetch('http://localhost:5000/api/inventory');
       const data = await response.json();
-
-      // Agrupar e contar medicamentos por nome (ou outro campo)
-
       setInventory(data);
     } catch (error) {
       console.error('Erro ao buscar medicamentos:', error);
@@ -77,7 +71,7 @@ const Consultas = () => {
       })
       .catch(error => {
         console.error('Erro ao criar consulta:', error);
-        alert('Erro ao criar consulta - Verifique o Estoque');
+        alert('Erro ao criar consulta');
       });
 
     console.log(consulta);
@@ -89,16 +83,14 @@ const Consultas = () => {
     fetchDoctors();
     fetchPacientes();
     fetchMedicamentos();
-    console.log('inventory', inventory);
   }, []);
 
-  console.log(doctors);
-  console.log(pacientes);
+  console.log('consultas', consultas);
 
   const filteredConsultas = consultas.filter(
     consulta =>
       consulta.nome_paciente.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      consulta.npome_medico.toLowerCase().includes(searchTerm.toLowerCase())
+      consulta.nome_medico.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -126,7 +118,8 @@ const Consultas = () => {
 
       <div className='space-y-4'>
         {filteredConsultas.map(consulta => (
-          <div key={consulta.id} className='bg-card p-6 rounded-lg border border-border'>
+          consulta.nome_medicamento && (
+            <div key={consulta.id} className='bg-card p-6 rounded-lg border border-border'>
             <div className='flex justify-between items-start mb-4'>
               <div className='flex items-center gap-3'>
                 <User className='h-5 w-5 text-primary' />
@@ -142,7 +135,26 @@ const Consultas = () => {
                 Tipo: {consulta.medico_especialidade}{' '}
               </p>
             </div>
+
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <FileText className="h-4 w-4 text-primary" />
+                  <h4 className="font-medium text-foreground">Prescrições</h4>
+                </div>
+                <div className="bg-muted p-3 rounded-lg">
+                  <div className="flex justify-between items-center py-1">
+                      <span className="text-sm font-medium text-foreground">
+                        {consulta.nome_medicamento}
+                      </span>
+                      <div className="text-sm text-muted-foreground">
+                        Qtd: {consulta.quantidade_retirada} | {consulta.lote}
+                      </div>
+                    </div>
+                </div>
+              </div>
+
           </div>
+          )
         ))}
       </div>
 
@@ -171,7 +183,7 @@ const Consultas = () => {
             <option value=''>Selecione um paciente</option>
             {pacientes?.map(p => (
               <option key={p.id} value={p.id}>
-                {p.nome}
+                {p.nome} | {p.cartao_sus}
               </option>
             ))}
           </select>
@@ -181,7 +193,7 @@ const Consultas = () => {
             <option value=''>Selecione um médico</option>
             {doctors.map(m => (
               <option key={m.id} value={m.id}>
-                {m.nome}
+                {m.nome} | {m.crm}
               </option>
             ))}
           </select>
@@ -190,7 +202,7 @@ const Consultas = () => {
             <option value=''>Selecione um medicamento</option>
             {inventory.map(m => (
               <option key={m.id} value={m.id_medicamento}>
-                {m.nome_medicamento}
+                {m.nome_medicamento} | Lote: {m.lote} 
               </option>
             ))}
           </select>

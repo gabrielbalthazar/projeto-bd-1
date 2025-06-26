@@ -1,8 +1,8 @@
+import { ArrowUpDown, Database, FileText, Pill } from "lucide-react";
 import { useState } from "react";
-import { Database, Pill, FileText, ArrowUpDown, Plus, Search } from "lucide-react";
+import Consultas from "../components/Consultas";
 import Dashboard from "../components/Dashboard";
 import Medicamentos from "../components/Medicamentos";
-import Consultas from "../components/Consultas";
 import Movimentacoes from "../components/Movimentacoes";
 
 const Index = () => {
@@ -84,7 +84,7 @@ const Index = () => {
               }`}
             >
               <ArrowUpDown className="h-4 w-4" />
-              Movimentações
+              Saídas
             </button>
           </div>
         </div>

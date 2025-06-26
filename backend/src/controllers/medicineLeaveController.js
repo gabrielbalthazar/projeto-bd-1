@@ -1,7 +1,23 @@
 import db from '../db.js';
 
 export const findAll = (req, res) => {
-  db.all('SELECT * FROM Saida_Medicamento', function (err, rows) {
+  const query = `
+    SELECT 
+      Saida_Medicamento.quantidade_retirada,
+      datetime(Saida_Medicamento.data_movimentacao / 1000, 'unixepoch', '-3 hours') AS data_movimentacao,
+      Medicamento.nome AS nome_medicamento,
+      Medicamento.data_validade AS data_validade,
+      Saida_Medicamento.lote,
+      Gera.id_prescricao,
+      Medico.nome AS nome_medico
+    FROM Saida_Medicamento
+    LEFT JOIN Gera ON Saida_Medicamento.id = Gera.id_saida_medicamento
+    LEFT JOIN Medicamento ON Saida_Medicamento.id_medicamento = Medicamento.id
+    LEFT JOIN Prescricao ON Gera.id_prescricao = Prescricao.id
+    LEFT JOIN Medico ON Prescricao.id_medico = Medico.id
+  `;
+
+  db.all(query, function (err, rows) {
     if (err) {
       res.status(500).send({ error: err.message });
     } else {

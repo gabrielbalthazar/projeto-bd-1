@@ -4,20 +4,6 @@ import { useEffect, useState } from 'react';
 import { ModalBase } from '../components/ModalBase';
 
 const Dashboard = () => {
-  // Dados mockados - você integrará com seu backend
-  const stats = {
-    totalMedicamentos: 156,
-    entradas: 45,
-    saidas: 32,
-    estoqueMinimo: 8,
-  };
-
-  const medicamentosEstoqueMinimo = [
-    { nome: 'Paracetamol 500mg', estoque: 12, minimo: 50 },
-    { nome: 'Dipirona 500mg', estoque: 8, minimo: 30 },
-    { nome: 'Amoxicilina 500mg', estoque: 5, minimo: 25 },
-  ];
-
   const [inventory, setInventory] = useState([]);
   const [novoMedicoModalAberto, setModalNovoMedicoAberto] = useState(false);
   const [novoPacienteModalAberto, setModalNovoPacienteAberto] = useState(false);
@@ -26,9 +12,6 @@ const Dashboard = () => {
     try {
       const response = await fetch('http://localhost:5000/api/inventory');
       const data = await response.json();
-
-      // Agrupar e contar medicamentos por nome (ou outro campo)
-
       setInventory(data);
     } catch (error) {
       console.error('Erro ao buscar medicamentos:', error);
@@ -85,26 +68,6 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* <div className="bg-card p-6 rounded-lg border border-border">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-muted-foreground text-sm">Entradas (Mês)</p>
-              <p className="text-3xl font-bold text-green-600">{stats.entradas}</p>
-            </div>
-            <TrendingUp className="h-8 w-8 text-green-600" />
-          </div>
-        </div>
-
-        <div className="bg-card p-6 rounded-lg border border-border">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-muted-foreground text-sm">Saídas (Mês)</p>
-              <p className="text-3xl font-bold text-red-600">{stats.saidas}</p>
-            </div>
-            <TrendingDown className="h-8 w-8 text-red-600" />
-          </div>
-        </div> */}
-
         <div className='bg-card p-6 rounded-lg border border-border'>
           <div className='flex items-center justify-between'>
             <div>
@@ -128,6 +91,7 @@ const Dashboard = () => {
               <tr className='border-b border-border'>
                 <th className='text-left p-2 text-muted-foreground'>Medicamento</th>
                 <th className='text-left p-2 text-muted-foreground'>Estoque Atual</th>
+                <th className='text-left p-2 text-muted-foreground'>Lote</th>
                 <th className='text-left p-2 text-muted-foreground'>Status</th>
               </tr>
             </thead>
@@ -136,6 +100,7 @@ const Dashboard = () => {
                 <tr key={index} className='border-b border-border'>
                   <td className='p-2 text-foreground'>{med.nome_medicamento}</td>
                   <td className='p-2 text-foreground'>{med.quantidade}</td>
+                  <td className='p-2 text-foreground'>{med.lote}</td>
                   <td className='p-2'>
                     {med.quantidade <= 20 ? (
                       <span className='px-2 py-1 text-xs rounded-full bg-red-100 text-red-800'>
@@ -188,7 +153,10 @@ const Dashboard = () => {
         >
           <input name='nome' className='w-full border p-2 rounded' placeholder='Nome do médico' />
           <input name='crm' className='w-full border p-2 rounded' placeholder='CRM' />
-          <input name='especialidade' className='w-full border p-2 rounded' placeholder='especialidade' />
+          <select name='especialidade' className='w-full border p-2 rounded'>
+            <option value='clinico geral'>clinico geral</option>
+            <option value='pediatra'>pediatra</option>
+          </select>
           <button type='submit' className='bg-primary text-white px-4 py-2 rounded'>
             Salvar
           </button>
