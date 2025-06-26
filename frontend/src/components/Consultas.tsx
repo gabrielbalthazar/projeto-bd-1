@@ -1,8 +1,5 @@
-import {
-  Plus,
-  Search,
-  User
-} from 'lucide-react';
+import axios from 'axios';
+import { Plus, Search, User } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { ModalBase } from '../components/ModalBase';
 
@@ -12,119 +9,96 @@ const Consultas = () => {
   const [modalEditarAberto, setModalEditarAberto] = useState(false);
   const [modalExcluirAberto, setModalExcluirAberto] = useState(false);
   const [consultaSelecionada, setConsultaSelecionada] = useState(null);
-
-  // const consultas = [
-  //   {
-  //     id: 1,
-  //     paciente: 'Maria Silva',
-  //     medico: 'Dr. João Santos',
-  //     data: '2024-01-15',
-  //     hora: '14:30',
-  //     tipo: 'Consulta Geral',
-  //     status: 'Finalizada',
-  //     prescricoes: [
-  //       {
-  //         medicamento: 'Paracetamol 500mg',
-  //         quantidade: 20,
-  //         posologia: '1 comp. 8/8h',
-  //       },
-  //       {
-  //         medicamento: 'Dipirona 500mg',
-  //         quantidade: 10,
-  //         posologia: '1 comp. se dor',
-  //       },
-  //     ],
-  //   },
-  //   {
-  //     id: 2,
-  //     paciente: 'José Oliveira',
-  //     medico: 'Dra. Ana Costa',
-  //     data: '2024-01-15',
-  //     hora: '15:00',
-  //     tipo: 'Retorno',
-  //     status: 'Finalizada',
-  //     prescricoes: [
-  //       {
-  //         medicamento: 'Amoxicilina 500mg',
-  //         quantidade: 21,
-  //         posologia: '1 comp. 8/8h por 7 dias',
-  //       },
-  //     ],
-  //   },
-  //   {
-  //     id: 3,
-  //     paciente: 'Ana Ferreira',
-  //     medico: 'Dr. Carlos Lima',
-  //     data: '2024-01-16',
-  //     hora: '09:00',
-  //     tipo: 'Consulta Geral',
-  //     status: 'Agendada',
-  //     prescricoes: [],
-  //   },
-  // ];
+  const [doctors, setDoctors] = useState([]);
+  const [pacientes, setPacientes] = useState(null);
   const [consultas, setConsultas] = useState([]);
-  
-  // Dados mockados - você integrará com seu backend
-  // const consultas = [
-  //   {
-  //     id: 1,
-  //     paciente: "Maria Silva",
-  //     medico: "Dr. João Santos",
-  //     data: "2024-01-15",
-  //     hora: "14:30",
-  //     tipo: "Consulta Geral",
-  //     status: "Finalizada",
-  //     prescricoes: [
-  //       { medicamento: "Paracetamol 500mg", quantidade: 20, posologia: "1 comp. 8/8h" },
-  //       { medicamento: "Dipirona 500mg", quantidade: 10, posologia: "1 comp. se dor" }
-  //     ]
-  //   },
-  //   {
-  //     id: 2,
-  //     paciente: "José Oliveira",
-  //     medico: "Dra. Ana Costa",
-  //     data: "2024-01-15",
-  //     hora: "15:00",
-  //     tipo: "Retorno",
-  //     status: "Finalizada",
-  //     prescricoes: [
-  //       { medicamento: "Amoxicilina 500mg", quantidade: 21, posologia: "1 comp. 8/8h por 7 dias" }
-  //     ]
-  //   },
-  //   {
-  //     id: 3,
-  //     paciente: "Ana Ferreira",
-  //     medico: "Dr. Carlos Lima",
-  //     data: "2024-01-16",
-  //     hora: "09:00",
-  //     tipo: "Consulta Geral",
-  //     status: "Agendada",
-  //     prescricoes: []
-  //   }
-  // ];
+  const [inventory, setInventory] = useState([]);
+
+  async function fetchDoctors() {
+    try {
+      const response = await fetch('http://localhost:5000/api/doctors');
+      const data = await response.json();
+      setDoctors(data);
+    } catch (error) {
+      console.error('Erro ao buscar medicamentos:', error);
+    }
+  }
+
+  async function fetchPacientes() {
+    try {
+      const response = await fetch('http://localhost:5000/api/patients');
+      const data = await response.json();
+      setPacientes(data);
+    } catch (error) {
+      console.error('Erro ao buscar medicamentos:', error);
+    }
+  }
+
+  async function fetchConsultas() {
+    try {
+      const response = await fetch('http://localhost:5000/api/meeting');
+      const data = await response.json();
+
+      // Agrupar e contar medicamentos por nome (ou outro campo)
+
+      setConsultas(data);
+    } catch (error) {
+      console.error('Erro ao buscar medicamentos:', error);
+    }
+  }
+
+    async function fetchMedicamentos() {
+    try {
+      const response = await fetch('http://localhost:5000/api/inventory');
+      const data = await response.json();
+
+      // Agrupar e contar medicamentos por nome (ou outro campo)
+
+      setInventory(data);
+    } catch (error) {
+      console.error('Erro ao buscar medicamentos:', error);
+    }
+  }
+
+  const saveConsulta = (consulta: any) => {
+    const { id_medicamento } = consulta;
+    const medicamento = inventory.find(item => item.id_medicamento == id_medicamento);
+    const lote = medicamento.lote;
+
+    consulta = { ...consulta, lote };
+
+    console.log('consulta', consulta);
+
+    axios
+      .post('http://localhost:5000/api/meeting', consulta)
+      .then(response => {
+        console.log('Consulta criada com sucesso:', response.data);
+        fetchConsultas();
+      })
+      .catch(error => {
+        console.error('Erro ao criar consulta:', error);
+        alert('Erro ao criar consulta - Verifique o Estoque');
+      });
+
+    console.log(consulta);
+  }
+
 
   useEffect(() => {
-    async function fetchConsultas() {
-      try {
-        const response = await fetch("http://localhost:5000/api/meeting");
-        const data = await response.json();
-
-        // Agrupar e contar medicamentos por nome (ou outro campo)
-
-        setConsultas(data);
-      } catch (error) {
-        console.error("Erro ao buscar medicamentos:", error);
-      }
-    }
-
     fetchConsultas();
+    fetchDoctors();
+    fetchPacientes();
+    fetchMedicamentos();
+    console.log('inventory', inventory);
   }, []);
 
-  console.log(consultas);
+  console.log(doctors);
+  console.log(pacientes);
 
-  const filteredConsultas = consultas.filter(consulta =>
-    consulta.nome_paciente.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    consulta.npome_medico.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredConsultas = consultas.filter(
+    consulta =>
+      consulta.nome_paciente.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      consulta.npome_medico.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -145,34 +119,30 @@ const Consultas = () => {
           type='text'
           placeholder='Pesquisar consultas...'
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          onChange={e => setSearchTerm(e.target.value)}
           className='w-full pl-10 pr-4 py-2 bg-card border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent'
         />
       </div>
 
       <div className='space-y-4'>
-        {filteredConsultas.map((consulta) => (
-          <div
-            key={consulta.id}
-            className='bg-card p-6 rounded-lg border border-border'
-          >
+        {filteredConsultas.map(consulta => (
+          <div key={consulta.id} className='bg-card p-6 rounded-lg border border-border'>
             <div className='flex justify-between items-start mb-4'>
               <div className='flex items-center gap-3'>
                 <User className='h-5 w-5 text-primary' />
                 <div>
-                  <h3 className="font-semibold text-foreground">{consulta.nome_paciente}</h3>
-                  <p className="text-sm text-muted-foreground">{consulta.nome_medico}</p>
+                  <h3 className='font-semibold text-foreground'>{consulta.nome_paciente}</h3>
+                  <p className='text-sm text-muted-foreground'>{consulta.nome_medico}</p>
                 </div>
               </div>
             </div>
 
-            <div className="mb-4">
-              <p className="text-sm text-muted-foreground">Tipo: {consulta.medico_especialidade} </p>
+            <div className='mb-4'>
+              <p className='text-sm text-muted-foreground'>
+                Tipo: {consulta.medico_especialidade}{' '}
+              </p>
             </div>
-
           </div>
-
-          
         ))}
       </div>
 
@@ -182,32 +152,56 @@ const Consultas = () => {
         titulo='Nova Consulta'
       >
         <form
-          onSubmit={(e) => {
+          onSubmit={e => {
             e.preventDefault();
+            const formData = new FormData(e.target);
+            const info = {
+              id_paciente: formData.get('id_paciente'),
+              id_medico: formData.get('id_medico'),
+              id_medicamento: formData.get('id_medicamento'),
+              quantidade: formData.get('quantidade'),
+            };
+            saveConsulta(info);
             setModalNovaAberto(false);
           }}
           className='space-y-2'
         >
+          <label>Paciente</label>
+          <select name='id_paciente' className='w-full border p-2 rounded'>
+            <option value=''>Selecione um paciente</option>
+            {pacientes?.map(p => (
+              <option key={p.id} value={p.id}>
+                {p.nome}
+              </option>
+            ))}
+          </select>
+
+          <label>Médico</label>
+          <select name='id_medico' className='w-full border p-2 rounded'>
+            <option value=''>Selecione um médico</option>
+            {doctors.map(m => (
+              <option key={m.id} value={m.id}>
+                {m.nome}
+              </option>
+            ))}
+          </select>
+          <label>Medicamento</label>
+          <select name='id_medicamento' className='w-full border p-2 rounded'>
+            <option value=''>Selecione um medicamento</option>
+            {inventory.map(m => (
+              <option key={m.id} value={m.id_medicamento}>
+                {m.nome_medicamento}
+              </option>
+            ))}
+          </select>
+          <label>Quantidade</label>
           <input
             className='w-full border p-2 rounded'
-            placeholder='Nome do paciente'
+            type='number'
+            name='quantidade'
+            placeholder='Quantidade'
           />
-          <input
-            className='w-full border p-2 rounded'
-            placeholder='Nome do médico'
-          />
-          <input
-            className='w-full border p-2 rounded'
-            placeholder='Data (AAAA-MM-DD)'
-          />
-          <input
-            className='w-full border p-2 rounded'
-            placeholder='Hora (HH:MM)'
-          />
-          <button
-            type='submit'
-            className='bg-primary text-white px-4 py-2 rounded'
-          >
+          <button type='submit' className='bg-primary text-white px-4 py-2 rounded'>
             Salvar
           </button>
         </form>
@@ -219,7 +213,7 @@ const Consultas = () => {
         titulo='Editar Consulta'
       >
         <form
-          onSubmit={(e) => {
+          onSubmit={e => {
             e.preventDefault();
             setModalEditarAberto(false);
           }}
@@ -231,10 +225,7 @@ const Consultas = () => {
             defaultValue={consultaSelecionada?.paciente}
           />
           <label className='block text-sm font-medium'>Médico</label>
-          <input
-            className='w-full border p-2 rounded'
-            defaultValue={consultaSelecionada?.medico}
-          />
+          <input className='w-full border p-2 rounded' defaultValue={consultaSelecionada?.medico} />
           <label className='block text-sm font-medium'>Data</label>
           <input
             className='w-full border p-2 rounded'
@@ -247,10 +238,7 @@ const Consultas = () => {
             defaultValue={consultaSelecionada?.hora}
             type='time'
           />
-          <button
-            type='submit'
-            className='bg-primary text-white px-4 py-2 rounded'
-          >
+          <button type='submit' className='bg-primary text-white px-4 py-2 rounded'>
             Salvar Alterações
           </button>
         </form>
@@ -266,15 +254,10 @@ const Consultas = () => {
           <strong>{consultaSelecionada?.paciente}</strong>?
         </p>
         <div className='flex justify-end gap-2'>
-          <button
-            onClick={() => setModalExcluirAberto(false)}
-            className='px-4 py-2 rounded border'
-          >
+          <button onClick={() => setModalExcluirAberto(false)} className='px-4 py-2 rounded border'>
             Cancelar
           </button>
-          <button className='px-4 py-2 rounded bg-destructive text-white'>
-            Excluir
-          </button>
+          <button className='px-4 py-2 rounded bg-destructive text-white'>Excluir</button>
         </div>
       </ModalBase>
     </div>
