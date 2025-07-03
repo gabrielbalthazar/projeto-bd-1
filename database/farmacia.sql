@@ -15,9 +15,9 @@ CREATE TABLE Medico (
 
 -- Tabela Atende
 CREATE TABLE Atende (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     id_medico INTEGER NOT NULL,
     id_paciente INTEGER NOT NULL,
-    PRIMARY KEY (id_medico, id_paciente),
     FOREIGN KEY (id_medico) REFERENCES Medico(id),
     FOREIGN KEY (id_paciente) REFERENCES Paciente(id)
 );
@@ -28,6 +28,8 @@ CREATE TABLE Prescricao (
     data_emissao DATE NOT NULL,
     id_medico INTEGER NOT NULL,
     id_paciente INTEGER NOT NULL,
+    id_atende INTEGER NOT NULL,
+    FOREIGN KEY (id_atende) REFERENCES Atende(id),
     FOREIGN KEY (id_medico) REFERENCES Medico(id),
     FOREIGN KEY (id_paciente) REFERENCES Paciente(id)
 );
